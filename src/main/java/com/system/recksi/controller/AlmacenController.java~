@@ -1,0 +1,64 @@
+package com.system.recksi.controller;
+
+import com.system.recksi.DTO.AlmacenDTO;
+import com.system.recksi.service.Interfaces.AlmacenService;
+import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import java.util.HashMap;
+import java.util.Map;
+
+@Controller
+@RequestMapping("/almacen")
+public class AlmacenController {
+
+    private final AlmacenService almacenService;
+
+    public AlmacenController(AlmacenService almacenService) {
+        this.almacenService = almacenService;
+    }
+
+    @GetMapping("/listar")
+    public String mostrarPaginaAlmacenes() {
+        return "almacenes";
+    }
+
+    @GetMapping("/api/listar")
+    public ResponseEntity<?> listarAlmacenesApi() {
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        response.put("data", almacenService.listarAlmacenes());
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/api/guardar")
+    public ResponseEntity<?> guardarAlmacenApi(@Valid @RequestBody AlmacenDTO almacen, BindingResult bindingResult) {
+        Map<String, Object> response = new HashMap<>();
+        if (bindingResult.hasErrors()) {
+            Map<String, String> errores = new HashMap<>();
+            bindingResult.getFieldErrors().forEach(error -> errores.put(error.getField(), error.getDefaultMessage()));
+            response.put("success", false);
+            response.put("message", "Datos inválidos");
+            response.put("errors", errores);
+            return ResponseEntity.badRequest().body(response);
+        }
+        try {
+            almacenService.guardarAlmacen(almacen);
+            response.put("success", true);
+            response.put("message", "Almacén guardado exitosamente");
+            return ResponseEntity.ok(response);
+        } catch (IllegalArgumentException e) {
+            response.put("success", false);
+            response.put("message", e.getMessage());
+            return ResponseEntity.badRequest().body(response);
+        }
+    }
+
+
+}

@@ -1,0 +1,72 @@
+package com.system.recksi.DTO;
+
+import jakarta.validation.constraints.Positive;
+
+import java.time.LocalDate;
+
+public class FiltroMovimentoDTO {
+
+    private LocalDate fechaInicio;
+    
+    private LocalDate fechaFin;
+
+    @Positive(message = "El ID de almacén debe ser válido")
+    private Long almacenId;
+
+    @Positive(message = "El ID de tipo de movimiento debe ser válido")
+    private Long tipoMovimientoId;
+
+    @Positive(message = "El ID de usuario debe ser válido")
+    private Long UsuarioId;
+
+    public FiltroMovimentoDTO() {
+    }
+
+    public FiltroMovimentoDTO(LocalDate fechaInicio, LocalDate fechaFin, Long almacenId, Long tipoMovimientoId, Long usuarioId) {
+        this.fechaInicio = fechaInicio;
+        this.fechaFin = fechaFin;
+        this.almacenId = almacenId;
+        this.tipoMovimientoId = tipoMovimientoId;
+        UsuarioId = usuarioId;
+    }
+
+    public LocalDate getFechaInicio() {
+        return fechaInicio;
+    }
+
+    public void setFechaInicio(LocalDate fechaInicio) {
+        this.fechaInicio = fechaInicio;
+    }
+
+    public LocalDate getFechaFin() {
+        return fechaFin;
+    }
+
+    public void setFechaFin(LocalDate fechaFin) {
+        this.fechaFin = fechaFin;
+    }
+
+    public Long getAlmacenId() {
+        return almacenId;
+    }
+
+    public void setAlmacenId(Long almacenId) {
+        this.almacenId = almacenId;
+    }
+
+    public Long getTipoMovimientoId() {
+        return tipoMovimientoId;
+    }
+
+    public void setTipoMovimientoId(Long tipoMovimientoId) {
+        this.tipoMovimientoId = tipoMovimientoId;
+    }
+
+    public Long getUsuarioId() {
+        return UsuarioId;
+    }
+
+    public void setUsuarioId(Long usuarioId) {
+        UsuarioId = usuarioId;
+    }
+}

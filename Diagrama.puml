@@ -1,0 +1,515 @@
+@startuml
+class com.system.recksi.model.Almacen {
+- Long id
+- String nombre
+- Integer stockActual
+- Integer stockMinimo
+- Producto producto
+- Integer estado
++ Long getId()
++ void setId(Long)
++ String getNombre()
++ void setNombre(String)
++ Integer getStockActual()
++ void setStockActual(Integer)
++ Integer getStockMinimo()
++ void setStockMinimo(Integer)
++ Producto getProducto()
++ void setProducto(Producto)
++ Integer getEstado()
++ void setEstado(Integer)
++ void aumentarStock(Integer)
++ void disminuirStock(Integer)
+}
+
+
+class com.system.recksi.model.TipoMovimiento {
+- Long id
+- String nombre
++ Long getId()
++ void setId(Long)
++ String getNombre()
++ void setNombre(String)
+}
+
+
+class com.system.recksi.config.SecurityConfig {
++ BCryptPasswordEncoder passwordEncoder()
+}
+
+class com.system.recksi.DTO.ProductoDTO {
+- String nombre
+- String descripcion
+- Integer stock
++ String getNombre()
++ void setNombre(String)
++ String getDescripcion()
++ void setDescripcion(String)
++ Integer getStock()
++ void setStock(Integer)
+}
+
+
+interface com.system.recksi.service.Interfaces.ProductoService {
+~ List<Producto> listarProductos()
+~ Producto guardarProducto(ProductoDTO)
+~ Producto actualizarProducto(Long,ProductoDTO)
+~ long contarProductos()
+~ Optional<Producto> obtenerProductoPorId(Long)
+~ Optional<Producto> obtenerProductoPorNombre(String)
+~ void eliminarProducto(Long)
+~ Optional<Producto> cambiarEstadoProducto(Long)
+~ long contarProductosActivos()
+}
+
+class com.system.recksi.controller.ProductoController {
+- ProductoService productoService
++ String listarProductos(Model)
++ ResponseEntity<?> listarProductosApi()
++ ResponseEntity<?> guardarProductoApi(ProductoDTO,BindingResult)
++ ResponseEntity<?> actualizarProductoApi(Long,ProductoDTO,BindingResult)
++ ResponseEntity<?> obtenerProducto(Long)
++ ResponseEntity<?> eliminarProductoAjax(Long)
++ ResponseEntity<?> cambiarEstadoProductoAjax(Long)
+}
+
+
+interface com.system.recksi.repository.UsuarioRepository {
+~ Optional<Usuario> findByUsuario(String)
+~ Optional<Usuario> findByCorreo(String)
+~ boolean existsByUsuario(String)
+~ boolean existsByCorreo(String)
+~ List<Usuario> findAllByEstadoNot(Integer)
+~ long countByEstadoNot(Integer)
+}
+
+class com.system.recksi.model.MovimientoInventario {
+- Long id
+- TipoMovimiento tipoMovimiento
+- Integer cantidad
+- LocalDateTime fechaHora
+- Almacen almacenOrigen
+- Almacen almacenDestino
+- Usuario usuario
+- Integer estado
++ Long getId()
++ void setId(Long)
++ TipoMovimiento getTipoMovimiento()
++ void setTipoMovimiento(TipoMovimiento)
++ Integer getCantidad()
++ void setCantidad(Integer)
++ LocalDateTime getFechaHora()
++ void setFechaHora(LocalDateTime)
++ Almacen getAlmacenOrigen()
++ void setAlmacenOrigen(Almacen)
++ Almacen getAlmacenDestino()
++ void setAlmacenDestino(Almacen)
++ Usuario getUsuario()
++ void setUsuario(Usuario)
++ Integer getEstado()
++ void setEstado(Integer)
+}
+
+
+class com.system.recksi.controller.AlmacenController {
+- AlmacenService almacenService
++ String mostrarPaginaAlmacenes()
++ ResponseEntity<?> listarAlmacenesApi()
++ ResponseEntity<?> guardarAlmacenApi(AlmacenDTO,BindingResult)
++ ResponseEntity<?> actualizarAlmacenApi(Long,AlmacenDTO,BindingResult)
++ ResponseEntity<?> eliminarAlmacenApi(Long)
+}
+
+
+interface com.system.recksi.repository.OpcionRepository {
+}
+class com.system.recksi.model.Usuario {
+- Long id
+- String nombre
+- String usuario
+- String clave
+- String correo
+- Integer estado
+- Perfil perfil
++ Long getId()
++ void setId(Long)
++ String getNombre()
++ void setNombre(String)
++ String getUsuario()
++ void setUsuario(String)
++ String getClave()
++ void setClave(String)
++ String getCorreo()
++ void setCorreo(String)
++ Integer getEstado()
++ void setEstado(Integer)
++ Perfil getPerfil()
++ void setPerfil(Perfil)
++ String toString()
+}
+
+
+class com.system.recksi.service.Implementaciones.UsuarioService {
+- UsuarioRepository usuarioRepository
+- BCryptPasswordEncoder passwordEncoder
++ List<Usuario> listarUsuarios()
++ Usuario guardarUsuario(Usuario)
++ long contarUsuarios()
++ Optional<Usuario> obtenerUsuarioPorId(Long)
++ Optional<Usuario> findByUsuario(String)
++ void eliminarUsuario(Long)
++ Optional<Usuario> cambiarEstadoUsuario(Long)
++ boolean existeUsuario(String)
++ boolean existeCorreo(String)
++ boolean verificarContrasena(String,String)
+}
+
+
+class com.system.recksi.DTO.FiltroMovimentoDTO {
+- LocalDate fechaInicio
+- LocalDate fechaFin
+- Long almacenId
+- Long tipoMovimientoId
+- Long UsuarioId
++ LocalDate getFechaInicio()
++ void setFechaInicio(LocalDate)
++ LocalDate getFechaFin()
++ void setFechaFin(LocalDate)
++ Long getAlmacenId()
++ void setAlmacenId(Long)
++ Long getTipoMovimientoId()
++ void setTipoMovimientoId(Long)
++ Long getUsuarioId()
++ void setUsuarioId(Long)
+}
+
+
+interface com.system.recksi.repository.AlmacenRepository {
+~ List<Almacen> findAllByEstadoNot(Integer)
+~ Optional<Almacen> findById(Long)
+~ Optional<Almacen> findByNombre(String)
+~ Long countByEstadoNot(Integer)
+~ boolean existsByNombreIgnoreCase(String)
+~ boolean existsByNombreIgnoreCaseAndIdNot(String,Long)
+}
+
+class com.system.recksi.service.Implementaciones.PerfilServiceImpl {
+- PerfilRepository perfilRepository
+- OpcionRepository opcionRepository
++ List<Perfil> listarPerfilesActivos()
++ List<Perfil> listarTodosLosPerfiles()
++ Perfil guardarPerfil(Perfil)
++ Optional<Perfil> obtenerPerfilPorId(Long)
++ Optional<Perfil> cambiarEstadoPerfil(Long)
++ List<Opcion> listarTodasLasOpciones()
++ void eliminarPerfil(Long)
+}
+
+
+class com.system.recksi.config.SessionInterceptor {
++ boolean preHandle(HttpServletRequest,HttpServletResponse,Object)
+}
+
+class com.system.recksi.service.Implementaciones.AlmacenServiceImpl {
+- AlmacenRepository almacenRepository
+- ProductoRepository productoRepository
++ List<Almacen> listarAlmacenes()
++ Almacen guardarAlmacen(AlmacenDTO)
++ Almacen actualizarAlmacen(Long,AlmacenDTO)
++ void eliminarAlmacen(Long)
++ Almacen obtenerAlmacenPorId(Long)
++ long contarAlmacenes()
++ void aumentarStock(Long,Integer)
++ void disminuirStock(Long,Integer)
+}
+
+
+interface com.system.recksi.service.Interfaces.PerfilService {
+~ List<Perfil> listarPerfilesActivos()
+~ List<Perfil> listarTodosLosPerfiles()
+~ Perfil guardarPerfil(Perfil)
+~ Optional<Perfil> obtenerPerfilPorId(Long)
+~ Optional<Perfil> cambiarEstadoPerfil(Long)
+~ List<Opcion> listarTodasLasOpciones()
+~ void eliminarPerfil(Long)
+}
+
+interface com.system.recksi.repository.TipoMovimientoRepository {
+}
+interface com.system.recksi.service.Interfaces.TipoMovimientoService {
+~ List<TipoMovimiento> listarTipoMovimientos()
+}
+
+class com.system.recksi.service.Implementaciones.MovimientoInventarioImpl {
+- MovimientoInventarioRepository movimientoInventarioRepository
+- AlmacenRepository almacenRepository
+- TipoMovimientoRepository tipoMovimientoRepository
+- UsuarioRepository usuarioRepository
+- StockDao stockDao
++ List<MovimientoInventario> listarMovimientosInventario()
++ List<MovimientoInventario> buscarMovimientoInventario(FiltroMovimentoDTO)
++ MovimientoInventario guardarMovimientoInventario(MovimientoInventarioDTO)
++ MovimientoInventario actualizarMovimientoInventario(Long,MovimientoInventarioDTO)
++ void eliminarMovimientoInventario(Long)
++ Integer calcularStockActual(Long)
++ Long contarMovimientosInventario()
+}
+
+
+class com.system.recksi.service.Implementaciones.ProductoServiceImpl {
+- ProductoRepository productoRepository
++ List<Producto> listarProductos()
++ Producto guardarProducto(ProductoDTO)
++ Producto actualizarProducto(Long,ProductoDTO)
++ long contarProductos()
++ Optional<Producto> obtenerProductoPorId(Long)
++ Optional<Producto> obtenerProductoPorNombre(String)
++ void eliminarProducto(Long)
++ Optional<Producto> cambiarEstadoProducto(Long)
++ long contarProductosActivos()
+}
+
+
+class com.system.recksi.controller.MovimientoInventarioController {
+- MovimientoInventarioService movimientoInventarioService
+- TipoMovimientoService tipoMovimientoService
++ String mostrarPaginaMovimientosInventario()
++ ResponseEntity<?> listarMovimientosInventarioApi()
++ ResponseEntity<?> buscarMovimientosInventarioApi(FiltroMovimentoDTO,BindingResult)
++ ResponseEntity<?> guardarMovimientoInventarioApi(MovimientoInventarioDTO,BindingResult)
++ ResponseEntity<?> actualizarMovimientoInventarioApi(Long,MovimientoInventarioDTO,BindingResult)
++ ResponseEntity<?> eliminarMovimientoInventarioApi(Long)
++ ResponseEntity<?> obtenerStockAlmacenApi(Long)
++ ResponseEntity<?> obtenerTipoMovimientoApi()
+}
+
+
+interface com.system.recksi.repository.MovimientoInventarioRepository {
+~ List<MovimientoInventario> findAllByEstadoNot(Integer)
+~ Long countByEstadoNot(Integer)
+~ List<MovimientoInventario> buscarConFiltros(LocalDateTime,LocalDateTime,Long,Long,Long)
+}
+
+class com.system.recksi.config.WebConfig {
+- SessionInterceptor sessionInterceptor
++ void addResourceHandlers(ResourceHandlerRegistry)
++ void addInterceptors(InterceptorRegistry)
++ void addCorsMappings(CorsRegistry)
+}
+
+
+class com.system.recksi.model.Perfil {
+- Long id
+- String nombre
+- String descripcion
+- boolean estado
+- Set<Opcion> opciones
++ Long getId()
++ void setId(Long)
++ String getNombre()
++ void setNombre(String)
++ String getDescripcion()
++ void setDescripcion(String)
++ boolean isEstado()
++ void setEstado(boolean)
++ Set<Opcion> getOpciones()
++ void setOpciones(Set<Opcion>)
++ String toString()
+}
+
+
+enum com.system.recksi.model.TipoMovimientoTipo {
++  INGRESO
++  SALIDA
++  TRANSFERENCIA
+- Long id
+- boolean requiereOrigen
+- boolean requiereDestino
++ {static} TipoMovimientoTipo buscarPorId(Long)
++ boolean isRequiereOrigen()
++ boolean isRequiereDestino()
+}
+
+
+interface com.system.recksi.repository.DAO.StockDao {
+~ Integer sumarEntradas(Long)
+~ Integer sumarSalidas(Long)
+}
+
+class com.system.recksi.controller.LoginController {
+- UsuarioService usuarioService
++ String mostrarFormularioLogin(HttpSession)
++ String procesarLogin(String,String,HttpSession,RedirectAttributes)
++ String logout(HttpSession,RedirectAttributes)
+}
+
+
+class com.system.recksi.service.Implementaciones.TipoMovimientoServiceImpl {
+- TipoMovimientoRepository tipoMovimientoRepository
++ List<TipoMovimiento> listarTipoMovimientos()
+}
+
+
+interface com.system.recksi.repository.PerfilRepository {
+~ List<Perfil> findByEstadoTrue()
+}
+
+class com.system.recksi.controller.GlobalExceptionHandler {
+- {static} Logger logger
++ String handleTypeMismatchException(TypeMismatchException)
+}
+
+
+class com.system.recksi.repository.DAO.StockDaoImpl {
+- EntityManager em
++ Integer sumarEntradas(Long)
++ Integer sumarSalidas(Long)
+}
+
+
+class com.system.recksi.DTO.MovimientoInventarioDTO {
+- Integer cantidad
+- Long almacenOrigenId
+- Long almacenDestinoId
+- Long tipoMovimientoId
+- Long usuarioId
++ Integer getCantidad()
++ void setCantidad(Integer)
++ Long getAlmacenOrigenId()
++ void setAlmacenOrigenId(Long)
++ Long getAlmacenDestinoId()
++ void setAlmacenDestinoId(Long)
++ Long getTipoMovimientoId()
++ void setTipoMovimientoId(Long)
++ Long getUsuarioId()
++ void setUsuarioId(Long)
+}
+
+
+interface com.system.recksi.repository.ProductoRepository {
+~ Optional<Producto> findByNombreAndEstadoNot(String,Integer)
+~ boolean existsByNombreAndEstadoNot(String,Integer)
+~ boolean existsByNombreIgnoreCaseAndEstadoNot(String,Integer)
+~ List<Producto> findAllByEstadoNot(Integer)
+~ Long countByEstadoNot(Integer)
+}
+
+interface com.system.recksi.service.Interfaces.AlmacenService {
+~ List<Almacen> listarAlmacenes()
+~ Almacen guardarAlmacen(AlmacenDTO)
+~ Almacen actualizarAlmacen(Long,AlmacenDTO)
+~ void eliminarAlmacen(Long)
+~ Almacen obtenerAlmacenPorId(Long)
+~ long contarAlmacenes()
+~ void aumentarStock(Long,Integer)
+~ void disminuirStock(Long,Integer)
+}
+
+class com.system.recksi.model.Producto {
+- Long id
+- String nombre
+- String descripcion
+- Integer estado
++ Long getId()
++ void setId(Long)
++ String getNombre()
++ void setNombre(String)
++ String getDescripcion()
++ void setDescripcion(String)
++ Integer getEstado()
++ void setEstado(Integer)
+}
+
+
+class com.system.recksi.controller.UsuarioController {
+- UsuarioService usuarioService
+- PerfilService perfilService
++ String listarUsuarios(Model)
++ ResponseEntity<?> listarUsuariosApi()
++ ResponseEntity<?> listarPerfilesActivosApi()
++ ResponseEntity<?> guardarUsuarioAjax(Usuario,BindingResult)
++ ResponseEntity<?> obtenerUsuario(Long)
++ ResponseEntity<?> eliminarUsuarioAjax(Long)
++ ResponseEntity<?> cambiarEstadoUsuarioAjax(Long)
+}
+
+
+class com.system.recksi.controller.DashboardController {
+- UsuarioService usuarioService
++ String mostrarDashboard(Model)
+}
+
+
+class com.system.recksi.model.Opcion {
+- Long id
+- String nombre
+- String ruta
+- String icono
++ Long getId()
++ void setId(Long)
++ String getNombre()
++ void setNombre(String)
++ String getRuta()
++ void setRuta(String)
++ String getIcono()
++ void setIcono(String)
+}
+
+
+class com.system.recksi.DTO.AlmacenDTO {
+- String nombre
+- Integer stockMinimo
+- Long productoId
++ String getNombre()
++ void setNombre(String)
++ Integer getStockMinimo()
++ void setStockMinimo(Integer)
++ Long getProductoId()
++ void setProductoId(Long)
+}
+
+
+class com.system.recksi.controller.PerfilController {
+- PerfilService perfilService
++ String mostrarPaginaPerfiles()
++ ResponseEntity<?> listarPerfilesApi()
++ ResponseEntity<?> obtenerPerfil(Long)
++ ResponseEntity<?> guardarPerfil(Perfil)
++ ResponseEntity<?> cambiarEstadoPerfil(Long)
++ ResponseEntity<?> listarOpcionesApi()
++ ResponseEntity<?> eliminarPerfil(Long)
+}
+
+
+class com.system.recksi.AccesoApplication {
++ {static} void main(String[])
+}
+
+interface com.system.recksi.service.Interfaces.MovimientoInventarioService {
+~ List<MovimientoInventario> listarMovimientosInventario()
+~ List<MovimientoInventario> buscarMovimientoInventario(FiltroMovimentoDTO)
+~ MovimientoInventario guardarMovimientoInventario(MovimientoInventarioDTO)
+~ MovimientoInventario actualizarMovimientoInventario(Long,MovimientoInventarioDTO)
+~ void eliminarMovimientoInventario(Long)
+~ Integer calcularStockActual(Long)
+~ Long contarMovimientosInventario()
+}
+
+
+
+org.springframework.data.jpa.repository.JpaRepository <|-- com.system.recksi.repository.UsuarioRepository
+org.springframework.data.jpa.repository.JpaRepository <|-- com.system.recksi.repository.OpcionRepository
+org.springframework.data.jpa.repository.JpaRepository <|-- com.system.recksi.repository.AlmacenRepository
+com.system.recksi.service.Interfaces.PerfilService <|.. com.system.recksi.service.Implementaciones.PerfilServiceImpl
+org.springframework.web.servlet.HandlerInterceptor <|.. com.system.recksi.config.SessionInterceptor
+com.system.recksi.service.Interfaces.AlmacenService <|.. com.system.recksi.service.Implementaciones.AlmacenServiceImpl
+org.springframework.data.jpa.repository.JpaRepository <|-- com.system.recksi.repository.TipoMovimientoRepository
+com.system.recksi.service.Interfaces.MovimientoInventarioService <|.. com.system.recksi.service.Implementaciones.MovimientoInventarioImpl
+com.system.recksi.service.Interfaces.ProductoService <|.. com.system.recksi.service.Implementaciones.ProductoServiceImpl
+org.springframework.data.jpa.repository.JpaRepository <|-- com.system.recksi.repository.MovimientoInventarioRepository
+org.springframework.web.servlet.config.annotation.WebMvcConfigurer <|.. com.system.recksi.config.WebConfig
+com.system.recksi.service.Interfaces.TipoMovimientoService <|.. com.system.recksi.service.Implementaciones.TipoMovimientoServiceImpl
+org.springframework.data.jpa.repository.JpaRepository <|-- com.system.recksi.repository.PerfilRepository
+com.system.recksi.repository.DAO.StockDao <|.. com.system.recksi.repository.DAO.StockDaoImpl
+org.springframework.data.jpa.repository.JpaRepository <|-- com.system.recksi.repository.ProductoRepository
+@enduml

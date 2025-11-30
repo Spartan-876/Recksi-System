@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!-- 
+    Fragmento de Sidebar
+    - th:fragment="sidebar(activeUri)": Define un bloque reutilizable llamado "sidebar" que acepta un parámetro "activeUri".
+    - activeUri: Contendrá la URL de la página actual para resaltar el enlace correcto.
+-->
+<div th:fragment="sidebar(activeUri)">
+    <div id="sidebar-overlay" class="sidebar-overlay"></div>
+    <nav id="sidebar" class="sidebar d-flex flex-column flex-shrink-0 p-3 text-white bg-dark">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+            <a th:href="@{/}" class="fs-4 text-white text-decoration-none fw-bold">Inventario App</a>
+            <button id="close-sidebar" class="btn btn-dark d-md-none p-0">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16"><path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"/></svg>
+            </button>
+        </div>
+        <hr>
+        <!-- Menú dinámico: itera sobre las opciones guardadas en la sesión -->
+        <ul class="nav nav-pills flex-column mb-auto">
+            <li th:each="opcion : ${session.menuOpciones}">
+                <a th:href="@{${opcion.ruta}}" 
+                   class="nav-link text-white rounded-lg"
+                   th:classappend="${opcion.ruta == activeUri} ? 'active' : ''">
+                    <span th:text="${opcion.nombre}"></span>
+                </a>
+            </li>
+        </ul>
+        <hr>
+        <ul class="nav nav-pills flex-column">
+            <li><a th:href="@{/logout}" class="nav-link text-white rounded-lg">Cerrar Sesión</a></li>
+        </ul>
+    </nav>
+</div>
+
+</body>
+</html>
