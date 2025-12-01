@@ -33,7 +33,10 @@ $(document).ready(function () {
                 dataSrc: 'data'
             },
             columns: [
-                { data: 'id' },
+                {
+                    data: 'id',
+                    render: (data) => `#PROD-${data}`
+                },
                 { data: 'nombre' },
                 { data: 'descripcion' },
                 {
@@ -66,7 +69,7 @@ $(document).ready(function () {
             buttons: [
                 {
                     extend: 'excelHtml5',
-                    text: '<i class="bi bi-file-earmark-excel"></i> Exportar a Excel',
+                    text: '<i class="bi bi-file-earmark-excel"></i> Excel',
                     title: 'Listado de Productos',
                     className: 'btn btn-success',
                     exportOptions: {
@@ -78,7 +81,7 @@ $(document).ready(function () {
                 },
                 {
                     extend: 'pdfHtml5',
-                    text: '<i class="bi bi-file-earmark-pdf"></i> Exportar a PDF',
+                    text: '<i class="bi bi-file-earmark-pdf"></i> PDF',
                     title: 'Listado de Productos',
                     className: 'btn btn-danger',
                     orientation: 'landscape',
@@ -141,12 +144,8 @@ $(document).ready(function () {
     }
 
     function setupEventListeners() {
-        // Botón nuevo registro
         $('#btnNuevoRegistro').on('click', openModalForNew);
 
-        // No es necesario un listener para cerrar el modal, Bootstrap lo maneja con data-bs-dismiss
-
-        // Submit form
         $('#formProducto').on('submit', function (e) {
             e.preventDefault();
             if (isEditing) {
@@ -156,7 +155,6 @@ $(document).ready(function () {
             }
         });
 
-        // Eventos de la tabla (delegados)
         $('#tablaProductos tbody').on('click', '.action-edit', handleEdit);
         $('#tablaProductos tbody').on('click', '.action-status', handleToggleStatus);
         $('#tablaProductos tbody').on('click', '.action-delete', handleDelete);
@@ -330,7 +328,7 @@ $(document).ready(function () {
                     .then(data => {
                         if (data.success) {
                             showNotification(data.message, 'success');
-                            loadProductos(); // Recargar la tabla
+                            loadProductos();
                         } else {
                             showNotification('Error: ' + data.message, 'error');
                         }
@@ -354,7 +352,6 @@ $(document).ready(function () {
     }
 
     function openModalForEdit(producto) {
-        // Limpiar formulario primero, luego rellenar y activar modo edición
         clearForm();
         $('#modalTitle').text('Editar Producto');
 

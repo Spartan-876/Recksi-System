@@ -32,4 +32,6 @@ public interface MovimientoInventarioRepository extends JpaRepository<Movimiento
             @Param("almacenId") Long almacenId
     );
 
+    List<MovimientoInventario> findTop5ByOrderByFechaHoraDesc();
+
 }

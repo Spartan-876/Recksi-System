@@ -23,12 +23,12 @@ public class WebConfig implements WebMvcConfigurer {
                 .addResourceLocations("classpath:/static/css/")
                 .setCachePeriod(0);
 
-        registry.addResourceHandler("/js/**")
-                .addResourceLocations("classpath:/static/js/")
+        registry.addResourceHandler("/imagen/**")
+                .addResourceLocations("classpath:/static/imagen/")
                 .setCachePeriod(0);
 
-        registry.addResourceHandler("/images/**")
-                .addResourceLocations("classpath:/static/images/")
+        registry.addResourceHandler("/js/**")
+                .addResourceLocations("classpath:/static/js/")
                 .setCachePeriod(0);
     }
 
@@ -36,7 +36,7 @@ public class WebConfig implements WebMvcConfigurer {
     public void addInterceptors(@NonNull InterceptorRegistry registry) {
         registry.addInterceptor(sessionInterceptor)
                 .addPathPatterns("/**")
-                .excludePathPatterns("/login", "/logout", "/css/**", "/js/**", "/images/**", "/error", "/favicon.ico"); // Excluye
+                .excludePathPatterns("/login", "/logout", "/css/**", "/js/**", "/imagen/**", "/error");
                                                                                                                         // rutas
     }
 

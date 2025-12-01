@@ -5,17 +5,16 @@ $(document).ready(function () {
     let movimientoModal;
     let usuarioLogueadoId = null;
     let usuarioLogueadoNombre = null;
-    let editingId = null; 
+    let editingId = null;
     const tiposMovimiento = { ingreso: 1, salida: 2, transferencia: 3 };
 
-    const API_BASE = '/movimientoInventario';
+    const API_BASE = '/movimientoInventario/api';
     const ENDPOINTS = {
-        list: `${API_BASE}/api/listar`,
-        search: `${API_BASE}/api/buscar`,
-        save: `${API_BASE}/api/guardar`,
-        delete: (id) => `${API_BASE}/api/eliminar/${id}`,
-        tipos: `${API_BASE}/api/TipoMovimiento`,
-        stock: (id) => `${API_BASE}/api/stock/${id}`,
+        list: `${API_BASE}/listar`,
+        save: `${API_BASE}/guardar`,
+        delete: (id) => `${API_BASE}/eliminar/${id}`,
+        tipos: `${API_BASE}/TipoMovimiento`,
+        stock: (id) => `${API_BASE}/stock/${id}`,
         usuarioLogueado: '/usuarios/api/usuarioLogueado'
     };
 
@@ -36,55 +35,59 @@ $(document).ready(function () {
             deferRender: true,
             ajax: {
                 url: ENDPOINTS.list,
-                dataSrc: 'data'
+                dataSrc: function (json) {
+                    if (!json || !json.data) return [];
+                    return json.data.slice(0, 20);
+                }
             },
+            order: [[0, 'desc']],
             columns: [
-                { data: 'id' },
+                {
+                    data: 'id', render: function (data, type, row) {
+                        if (type === 'display') {
+                            return `#MOV-${data}`;
+                        }
+                        return data;
+                    }
+                },
                 { data: 'fechaHora', render: formatDate },
-                { data: 'tipoMovimiento', render: (d) => d ? d.nombre : '' },
+                {
+                    data: 'tipoMovimiento',
+                    render: function (data) {
+                        if (!data || !data.nombre) return '';
+                        let nombre = data.nombre.toUpperCase();
+                        let claseBadge = 'bg-secondary';
+                        if (nombre.includes('INGRESO')) {
+                            claseBadge = 'bg-success';
+                        } else if (nombre.includes('SALIDA')) {
+                            claseBadge = 'bg-danger';
+                        } else if (nombre.includes('TRANSFERENCIA')) {
+                            claseBadge = 'bg-warning text-dark';
+                        }
+                        return `<span class="badge ${claseBadge}">${data.nombre}</span>`;
+                    }
+                },
                 { data: 'cantidad' },
-                { data: 'almacenOrigen', render: (d) => d ? d.nombre : '' },
-                { data: 'almacenDestino', render: (d) => d ? d.nombre : '' },
+                {
+                    data: 'almacenOrigen',
+                    render: (d) => d ? d.nombre : '<span class="badge bg-secondary">Regreso</span>'
+                },
+                {
+                    data: 'almacenDestino',
+                    render: (d) => d ? d.nombre : '<span class="badge bg-secondary">Cliente</span>'
+                },
                 { data: 'usuario', render: (d) => d ? d.nombre : '' },
+                { data: 'comentario', render: (d) => d ? (d.length > 80 ? d.substring(0, 80) + '...' : d) : '' },
                 { data: null, orderable: false, searchable: false, render: (r) => createActionButtons(r) }
             ],
+            columnsDefs: [
+                { responsivePriority: 1, targets: 1 },
+                { responsivePriority: 2, targets: 3 },
+                { responsivePriority: 3, targets: 2 },
+            ],
             language: { url: 'https://cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json' },
-            pageLength: 10,
-            dom: 'lBfrtip',
-            buttons: [
-                {
-                    extend: 'excelHtml5',
-                    text: '<i class="bi bi-file-earmark-excel"></i> Excel',
-                    className: 'btn btn-success',
-                    exportOptions:
-                    {
-                        columns: [0, 1, 2, 3, 4, 5, 6]
-                    }
-                },
-                {
-                    extend: 'pdfHtml5',
-                    text: '<i class="bi bi-file-earmark-pdf"></i> PDF',
-                    className: 'btn btn-danger',
-                    exportOptions:
-                    {
-                        columns: [0, 1, 2, 3, 4, 5, 6]
-                    }
-                },
-                {
-                    extend: 'print',
-                    text: '<i class="bi bi-printer"></i> Imprimir',
-                    className: 'btn btn-info',
-                    exportOptions:
-                    {
-                        columns: [0, 1, 2, 3, 4, 5, 6]
-                    }
-                },
-                {
-                    extend: 'colvis',
-                    text: '<i class="bi bi-eye"></i> Mostrar/Ocultar',
-                    className: 'btn btn-secondary'
-                }
-            ]
+            pageLength: 5,
+            lengthMenu: [5, 10, 20]
         });
     }
 
@@ -102,8 +105,6 @@ $(document).ready(function () {
 
     function setupEventListeners() {
         $('#btnNuevoRegistro').on('click', openModalForNew);
-        $('#btnBuscarFiltrado').on('click', buscarMovimientos);
-        $('#btnLimpiarFiltro').on('click', () => { $('#formFiltro')[0].reset(); dataTable.ajax.reload(); });
 
         $('#formMovimiento').on('submit', function (e) {
             e.preventDefault();
@@ -180,12 +181,10 @@ $(document).ready(function () {
     function loadSelects() {
         fetch('/almacen/api/listar').then(r => r.json()).then(res => {
             const items = res && res.data ? res.data : [];
-            const $fAlmacen = $('#fAlmacen');
             const $origen = $('#almacenOrigen');
             const $destino = $('#almacenDestino');
 
             items.forEach(a => {
-                $fAlmacen.append($('<option>', { value: a.id, text: a.nombre }));
                 $origen.append($('<option>', { value: a.id, text: a.nombre }));
                 $destino.append($('<option>', { value: a.id, text: a.nombre }));
             });
@@ -194,48 +193,12 @@ $(document).ready(function () {
         fetch(ENDPOINTS.tipos).then(r => r.json()).then(res => {
             const items = res && res.data ? res.data : [];
             const $tipo = $('#tipoMovimiento');
-            const $fTipo = $('#fTipoMovimiento');
 
             $tipo.append($('<option>', { value: '', text: '-- Seleccionar tipo --', disabled: true, hidden: true }));
             items.forEach(t => {
                 $tipo.append($('<option>', { value: t.id, text: t.nombre }));
-                $fTipo.append($('<option>', { value: t.id, text: t.nombre }));
             });
         }).catch(() => { });
-
-        fetch('/usuarios/api/listar').then(r => r.json()).then(res => {
-            const items = res && res.data ? res.data : [];
-            const $fUsuario = $('#fUsuario');
-
-            items.forEach(u => {
-                $fUsuario.append($('<option>', { value: u.id, text: u.nombre }));
-            });
-        }).catch(() => { });
-    }
-
-    function buscarMovimientos() {
-        const form = document.getElementById('formFiltro');
-        const formData = new FormData(form);
-        const payload = {
-            fechaInicio: formData.get('fechaInicio') || null,
-            fechaFin: formData.get('fechaFin') || null,
-            almacenId: formData.get('almacenId') ? parseInt(formData.get('almacenId')) : null,
-            tipoMovimientoId: formData.get('tipoMovimientoId') ? parseInt(formData.get('tipoMovimientoId')) : null,
-            usuarioId: formData.get('usuarioId') ? parseInt(formData.get('usuarioId')) : null
-        };
-
-        showLoading(true);
-        fetch(ENDPOINTS.search, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
-            .then(r => r.json())
-            .then(res => {
-                if (res && res.data) {
-                    dataTable.clear();
-                    dataTable.rows.add(res.data);
-                    dataTable.draw();
-                }
-            })
-            .catch(err => console.error(err))
-            .finally(() => showLoading(false));
     }
 
     function createMovimiento() {
@@ -248,7 +211,8 @@ $(document).ready(function () {
             almacenOrigenId: formData.get('almacenOrigenId') ? parseInt(formData.get('almacenOrigenId')) : null,
             almacenDestinoId: formData.get('almacenDestinoId') ? parseInt(formData.get('almacenDestinoId')) : null,
             tipoMovimientoId: formData.get('tipoMovimientoId') ? parseInt(formData.get('tipoMovimientoId')) : null,
-            usuarioId: formData.get('usuarioId') ? parseInt(formData.get('usuarioId')) : null
+            usuarioId: formData.get('usuarioId') ? parseInt(formData.get('usuarioId')) : null,
+            comentario: formData.get('comentario') ? formData.get('comentario').trim() : null
         };
 
         console.log('Payload enviado:', payload);
@@ -279,7 +243,16 @@ $(document).ready(function () {
     function handleDelete(e) {
         e.preventDefault();
         const id = $(this).data('id');
-        Swal.fire({ title: '¿Eliminar?', text: 'Confirmar eliminación', icon: 'warning', showCancelButton: true, confirmButtonText: 'Sí' }).then(result => {
+        Swal.fire({
+            title: '¿Estás seguro?',
+            text: "¡No podrás revertir esta acción!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#dc3545',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Sí, ¡eliminar!',
+            cancelButtonText: 'Cancelar'
+        }).then(result => {
             if (result.isConfirmed) {
                 fetch(ENDPOINTS.delete(id), { method: 'DELETE' })
                     .then(r => r.json())
@@ -301,6 +274,7 @@ $(document).ready(function () {
         $('#tipoMovimiento').val(rowData.tipoMovimiento ? rowData.tipoMovimiento.id : '');
         $('#almacenOrigen').val(rowData.almacenOrigen ? rowData.almacenOrigen.id : '');
         $('#almacenDestino').val(rowData.almacenDestino ? rowData.almacenDestino.id : '');
+        $('#comentario').val(rowData.comentario || '');
         $('#usuario').val(rowData.usuario ? rowData.usuario.id : (usuarioLogueadoId || ''));
         $('#usuarioDisplay').val(rowData.usuario ? rowData.usuario.nombre : (usuarioLogueadoNombre || ''));
 
@@ -312,6 +286,7 @@ $(document).ready(function () {
         $('#modalTitle').text('Nuevo Movimiento');
         $('#formMovimiento')[0].reset();
         editingId = null;
+        $('#comentario').val('');
         if (usuarioLogueadoId) {
             $('#usuario').val(usuarioLogueadoId);
             $('#usuarioDisplay').val(usuarioLogueadoNombre || '');
@@ -392,14 +367,24 @@ $(document).ready(function () {
 
     function showNotification(message, type = 'success') {
         const toastClass = type === 'success' ? 'text-bg-success' : 'text-bg-danger';
-        const notification = $(`<div class="toast align-items-center ${toastClass} border-0" role="alert" aria-live="assertive" aria-atomic="true"><div class="d-flex"><div class="toast-body">${message}</div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button></div></div>`);
-        $('#notification-container').append(notification);
-        const toast = new bootstrap.Toast(notification, { delay: 5000 }); toast.show();
-    }
 
-    function showLoading(show) {
-        const overlayId = 'loading-overlay'; const $overlay = $(`#${overlayId}`);
-        if (show) { if ($overlay.length === 0) { const spinner = $('<div>', { class: 'spinner-border text-primary', role: 'status' }).append($('<span>', { class: 'visually-hidden' }).text('Loading...')); const newOverlay = $('<div>', { id: overlayId, class: 'loading-overlay' }).append(spinner); $('body').append(newOverlay); } } else { $overlay.remove(); }
+        const notification = $(`
+            <div class="toast align-items-center ${toastClass} border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="d-flex">
+                    <div class="toast-body">
+                        ${message}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+            </div>
+        `);
+
+        $('#notification-container').append(notification);
+
+        const toast = new bootstrap.Toast(notification, {
+            delay: 5000
+        });
+        toast.show();
     }
 
 });

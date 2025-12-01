@@ -1,12 +1,5 @@
-/**
- * Script principal con lógica común para toda la aplicación.
- * Archivo: src/main/resources/static/js/main.js
- */
-
 $(document).ready(function() {
-    /**
-     * Configura la interactividad del sidebar responsivo.
-     */
+
     function setupSidebar() {
         const sidebar = $('#sidebar');
         const openSidebarBtn = $('#open-sidebar');
@@ -27,6 +20,5 @@ $(document).ready(function() {
         sidebarOverlay.on('click', closeSidebar);
     }
 
-    // Inicializar la funcionalidad del sidebar en cada carga de página.
     setupSidebar();
 });

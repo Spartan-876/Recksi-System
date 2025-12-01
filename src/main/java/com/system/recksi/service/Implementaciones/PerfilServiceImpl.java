@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 public class PerfilServiceImpl implements PerfilService {
@@ -37,6 +38,24 @@ public class PerfilServiceImpl implements PerfilService {
     @Override
     @Transactional
     public Perfil guardarPerfil(Perfil perfil) {
+        if (perfil.getId() != null) {
+            Optional<Perfil> existente = perfilRepository.findById(perfil.getId());
+            if (existente.isPresent()) {
+                Perfil pExist = existente.get();
+                if (perfil.getOpciones() == null || perfil.getOpciones().isEmpty()) {
+                    perfil.setOpciones(pExist.getOpciones());
+                } else {
+                    Set<Opcion> opcionesGestionadas = new java.util.HashSet<>();
+                    for (Opcion o : perfil.getOpciones()) {
+                        if (o != null && o.getId() != null) {
+                            opcionRepository.findById(o.getId()).ifPresent(opcionesGestionadas::add);
+                        }
+                    }
+                    perfil.setOpciones(opcionesGestionadas);
+                }
+            }
+        }
+
         return perfilRepository.save(perfil);
     }
 

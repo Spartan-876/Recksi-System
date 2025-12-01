@@ -74,14 +74,24 @@ public class UsuarioController {
     @ResponseBody
     public ResponseEntity<?> guardarUsuarioAjax(@Valid @RequestBody Usuario usuario, BindingResult bindingResult) {
         Map<String, Object> response = new HashMap<>();
-
         if (bindingResult.hasErrors()) {
             Map<String, String> errores = new HashMap<>();
-            bindingResult.getFieldErrors().forEach(error -> errores.put(error.getField(), error.getDefaultMessage()));
-            response.put("success", false);
-            response.put("message", "Datos inválidos");
-            response.put("errors", errores);
-            return ResponseEntity.badRequest().body(response);
+            bindingResult.getFieldErrors().forEach(error -> {
+                String field = error.getField();
+                if ("clave".equals(field)) {
+                    if (usuario.getId() != null && (usuario.getClave() == null || usuario.getClave().trim().isEmpty())) {
+                        return;
+                    }
+                }
+                errores.put(field, error.getDefaultMessage());
+            });
+
+            if (!errores.isEmpty()) {
+                response.put("success", false);
+                response.put("message", "Datos inválidos");
+                response.put("errors", errores);
+                return ResponseEntity.badRequest().body(response);
+            }
         }
 
         try {

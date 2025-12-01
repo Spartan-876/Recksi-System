@@ -20,6 +20,9 @@ public class MovimientoInventarioDTO {
     @NotNull(message = "El usuario es obligatorio")
     private Long usuarioId;
 
+    // Comentario opcional
+    private String comentario;
+
     public MovimientoInventarioDTO() {
     }
 
@@ -34,6 +37,14 @@ public class MovimientoInventarioDTO {
         this.almacenDestinoId = almacenDestinoId;
         this.tipoMovimientoId = tipoMovimientoId;
         this.usuarioId = usuarioId;
+    }
+
+    public String getComentario() {
+        return comentario;
+    }
+
+    public void setComentario(String comentario) {
+        this.comentario = comentario;
     }
 
     public Integer getCantidad() {

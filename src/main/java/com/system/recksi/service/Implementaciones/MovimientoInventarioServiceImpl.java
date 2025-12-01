@@ -21,7 +21,7 @@ import java.time.LocalTime;
 import java.util.List;
 
 @Service
-public class MovimientoInventarioImpl implements MovimientoInventarioService {
+public class MovimientoInventarioServiceImpl implements MovimientoInventarioService {
 
     private final MovimientoInventarioRepository movimientoInventarioRepository;
     private final AlmacenRepository almacenRepository;
@@ -29,7 +29,9 @@ public class MovimientoInventarioImpl implements MovimientoInventarioService {
     private final UsuarioRepository usuarioRepository;
     private final StockDao stockDao;
 
-    public MovimientoInventarioImpl(MovimientoInventarioRepository movimientoInventarioRepository, AlmacenRepository almacenRepository, TipoMovimientoRepository tipoMovimientoRepository, UsuarioRepository usuarioRepository, StockDao stockDao) {
+    public MovimientoInventarioServiceImpl(MovimientoInventarioRepository movimientoInventarioRepository,
+            AlmacenRepository almacenRepository, TipoMovimientoRepository tipoMovimientoRepository,
+            UsuarioRepository usuarioRepository, StockDao stockDao) {
         this.movimientoInventarioRepository = movimientoInventarioRepository;
         this.almacenRepository = almacenRepository;
         this.tipoMovimientoRepository = tipoMovimientoRepository;
@@ -48,15 +50,15 @@ public class MovimientoInventarioImpl implements MovimientoInventarioService {
     public List<MovimientoInventario> buscarMovimientoInventario(FiltroMovimentoDTO filtro) {
 
         LocalDateTime inicio = filtro.getFechaInicio() != null ? filtro.getFechaInicio().atStartOfDay() : null;
-        LocalDateTime fin = (filtro.getFechaFin() != null ? filtro.getFechaFin() : LocalDate.now()).atTime(LocalTime.MAX);
+        LocalDateTime fin = (filtro.getFechaFin() != null ? filtro.getFechaFin() : LocalDate.now())
+                .atTime(LocalTime.MAX);
 
         return movimientoInventarioRepository.buscarConFiltros(
                 inicio,
                 fin,
                 filtro.getTipoMovimientoId(),
                 filtro.getUsuarioId(),
-                filtro.getAlmacenId()
-        );
+                filtro.getAlmacenId());
     }
 
     @Override
@@ -75,6 +77,7 @@ public class MovimientoInventarioImpl implements MovimientoInventarioService {
         if (reglas.isRequiereDestino() && movimientoInventario.getAlmacenDestinoId() == null) {
             throw new IllegalArgumentException("Este tipo de movimiento requiere un almacén de destino.");
         }
+
         if (!reglas.isRequiereDestino() && movimientoInventario.getAlmacenDestinoId() != null) {
             throw new IllegalArgumentException("Este tipo de movimiento NO debe tener destino.");
         }
@@ -105,10 +108,14 @@ public class MovimientoInventarioImpl implements MovimientoInventarioService {
             nuevoMovimiento.setAlmacenDestino(destino);
         }
 
-        nuevoMovimiento.setTipoMovimiento(tipoMovimientoRepository.getReferenceById(movimientoInventario.getTipoMovimientoId().longValue()));
+        nuevoMovimiento.setTipoMovimiento(
+                tipoMovimientoRepository.getReferenceById(movimientoInventario.getTipoMovimientoId().longValue()));
 
         nuevoMovimiento.setUsuario(usuarioRepository.findById(movimientoInventario.getUsuarioId().longValue())
                 .orElseThrow(() -> new EntityNotFoundException("Usuario no encontrado")));
+
+        // Comentario opcional
+        nuevoMovimiento.setComentario(movimientoInventario.getComentario());
 
         return movimientoInventarioRepository.save(nuevoMovimiento);
     }
@@ -131,7 +138,6 @@ public class MovimientoInventarioImpl implements MovimientoInventarioService {
         if (movimiento.getEstado() == 2) {
             throw new IllegalStateException("El movimiento ya fue eliminado previamente.");
         }
-
 
         if (movimiento.getAlmacenOrigen() != null) {
             Almacen origen = movimiento.getAlmacenOrigen();

@@ -35,7 +35,11 @@ $(document).ready(function () {
                 dataSrc: 'data'
             },
             columns: [
-                { data: 'id' },
+                {
+                    data: 'id',
+                    render: (data) => `#ALM-${data}`
+
+                },
                 { data: 'nombre' },
                 { data: 'stockActual' },
                 { data: 'stockMinimo' },
@@ -44,7 +48,6 @@ $(document).ready(function () {
                         return data && data.nombre ? data.nombre : '';
                     }
                 },
-                // La columna 'estado' se eliminó para almacenes
                 {
                     data: null,
                     orderable: false,
@@ -55,9 +58,9 @@ $(document).ready(function () {
                 }
             ],
             columnDefs: [
-                { responsivePriority: 1, targets: 4 },
-                { responsivePriority: 2, targets: 3 },
-                { responsivePriority: 3, targets: 1 },
+                { responsivePriority: 1, targets: 1 },
+                { responsivePriority: 2, targets: 2 },
+                { responsivePriority: 1, targets: -1 }
             ],
             language: {
                 url: 'https://cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json'
@@ -68,7 +71,7 @@ $(document).ready(function () {
             buttons: [
                 {
                     extend: 'excelHtml5',
-                    text: '<i class="bi bi-file-earmark-excel"></i> Exportar a Excel',
+                    text: '<i class="bi bi-file-earmark-excel"></i> Excel',
                     title: 'Listado de Almacenes',
                     className: 'btn btn-success',
                     exportOptions: {
@@ -80,7 +83,7 @@ $(document).ready(function () {
                 },
                 {
                     extend: 'pdfHtml5',
-                    text: '<i class="bi bi-file-earmark-pdf"></i> Exportar a PDF',
+                    text: '<i class="bi bi-file-earmark-pdf"></i> PDF',
                     title: 'Listado de Almacenes',
                     className: 'btn btn-danger',
                     orientation: 'landscape',
@@ -133,12 +136,7 @@ $(document).ready(function () {
     }
 
     function setupEventListeners() {
-        // Botón nuevo registro
         $('#btnNuevoRegistro').on('click', openModalForNew);
-
-        // No es necesario un listener para cerrar el modal, Bootstrap lo maneja con data-bs-dismiss
-
-        // Submit form
         $('#formAlmacen').on('submit', function (e) {
             e.preventDefault();
             if (isEditing) {
@@ -148,7 +146,6 @@ $(document).ready(function () {
             }
         });
 
-        // Eventos de la tabla (delegados)
         $('#tablaAlmacenes tbody').on('click', '.action-edit', handleEdit);
         $('#tablaAlmacenes tbody').on('click', '.action-delete', handleDelete);
     }
@@ -269,10 +266,6 @@ $(document).ready(function () {
             });
     }
 
-
-    // La funcionalidad de cambiar estado fue removida para almacenes.
-
-
     function handleDelete(e) {
         e.preventDefault();
 
@@ -298,7 +291,7 @@ $(document).ready(function () {
                     .then(data => {
                         if (data.success) {
                             showNotification(data.message, 'success');
-                            loadAlmacenes(); // Recargar la tabla
+                            loadAlmacenes();
                         } else {
                             showNotification('Error: ' + data.message, 'error');
                         }
@@ -322,14 +315,11 @@ $(document).ready(function () {
     }
 
     function openModalForEdit(almacen) {
-        // Limpiar formulario primero, luego rellenar y activar modo edición
         clearForm();
         $('#modalTitle').text('Editar Almacén');
-
         $('#idAlmacen').val(almacen.id);
         $('#nombreAlmacen').val(almacen.nombre);
         $('#stockMinimo').val(almacen.stockMinimo != null ? almacen.stockMinimo : '');
-        // Si el almacén tiene objeto producto relacionado, seleccionar su id
         if (almacen.producto && almacen.producto.id) {
             $('#productoId').val(almacen.producto.id).trigger('change');
         } else {
@@ -387,7 +377,6 @@ $(document).ready(function () {
         return !hasErrors;
     }
 
-    // Cargar productos para el select de asignación en almacén
     function loadProductosList() {
         const productosEndpoint = '/productos/api/listar';
         fetch(productosEndpoint)
