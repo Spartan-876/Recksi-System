@@ -78,6 +78,7 @@
                 </header>
 
                 <div class="container-fluid">
+                    
                     <div class="card shadow-none rounded-lg">
                         <div class="card-header">
                             <ul
@@ -95,28 +96,6 @@
                                             class="bi bi-clipboard2-data-fill"
                                         ></i>
                                         Kardex / Historial
-                                    </button>
-                                </li>
-                                <li class="nav-item">
-                                    <button
-                                        class="nav-link text-dark fw-bold"
-                                        data-bs-toggle="tab"
-                                        data-bs-target="#tab-utilidades-vendedor"
-                                        type="button"
-                                    >
-                                        <i class="bi bi-person-circle"></i>
-                                        Stock Consolidado
-                                    </button>
-                                </li>
-                                <li class="nav-item">
-                                    <button
-                                        class="nav-link text-dark fw-bold"
-                                        data-bs-toggle="tab"
-                                        data-bs-target="#tab-utilidades-producto"
-                                        type="button"
-                                    >
-                                        <i class="bi bi-graph-up"></i>
-                                        Balance de Producción
                                     </button>
                                 </li>
                             </ul>
@@ -216,7 +195,7 @@
                                                 <div class="col-md-2">
                                                     <button
                                                         id="btnBuscarFiltrado"
-                                                        class="btn btn-light"
+                                                        class="btn btn-light border shadow-sm"
                                                         type="button"
                                                     >
                                                         <i
@@ -230,7 +209,7 @@
                                                     <button
                                                         id="btnLimpiarFiltro"
                                                         type="button"
-                                                        class="btn btn-light"
+                                                        class="btn btn-light border shadow-sm"
                                                     >
                                                         <i
                                                             class="bi bi-x-circle"
@@ -280,269 +259,9 @@
                                         </div>
                                     </div>
                                 </div>
-
-                                <div
-                                    class="tab-pane fade"
-                                    id="tab-utilidades-vendedor"
-                                >
-                                    <div
-                                        class="card bg-light shadow-sm mb-4 border-0"
-                                    >
-                                        <div class="card-body py-3">
-                                            <div
-                                                class="row g-3 align-items-center"
-                                            >
-                                                <div
-                                                    class="col-12 col-md-auto text-muted"
-                                                >
-                                                    <i
-                                                        class="bi bi-funnel-fill me-1"
-                                                    ></i>
-                                                    <strong
-                                                        >Filtrar por
-                                                        fecha:</strong
-                                                    >
-                                                </div>
-
-                                                <div class="col-md-3">
-                                                    <div class="input-group">
-                                                        <span
-                                                            class="input-group-text bg-white text-muted"
-                                                            ><i
-                                                                class="bi bi-calendar-event"
-                                                            ></i
-                                                        ></span>
-                                                        <input
-                                                            type="date"
-                                                            class="form-control"
-                                                            id="fechaInicioVendedor"
-                                                        />
-                                                        <div
-                                                            id="fechaInicioVendedor-error"
-                                                            class="invalid-feedback d-block"
-                                                        ></div>
-                                                    </div>
-                                                </div>
-
-                                                <div
-                                                    class="col-md-auto text-center text-muted d-none d-md-block"
-                                                >
-                                                    <i
-                                                        class="bi bi-arrow-right"
-                                                    ></i>
-                                                </div>
-
-                                                <div class="col-md-3">
-                                                    <div class="input-group">
-                                                        <span
-                                                            class="input-group-text bg-white text-muted"
-                                                            ><i
-                                                                class="bi bi-calendar-event-fill"
-                                                            ></i
-                                                        ></span>
-                                                        <input
-                                                            type="date"
-                                                            class="form-control"
-                                                            id="fechaFinVendedor"
-                                                        />
-                                                        <div
-                                                            id="fechaFinVendedor-error"
-                                                            class="invalid-feedback d-block"
-                                                        ></div>
-                                                    </div>
-                                                </div>
-
-                                                <div
-                                                    class="col-md-auto ms-auto d-flex gap-2"
-                                                >
-                                                    <button
-                                                        id="btnFiltrarVendedor"
-                                                        class="btn btn-primary px-4"
-                                                    >
-                                                        <i
-                                                            class="bi bi-search"
-                                                        ></i>
-                                                        Buscar
-                                                    </button>
-                                                    <button
-                                                        id="btnLimpiarFiltrosVendedor"
-                                                        class="btn btn-danger"
-                                                        title="Borrar filtros"
-                                                    >
-                                                        <i
-                                                            class="bi bi-x-lg"
-                                                        ></i>
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <table
-                                        id="tablaUtilidadesVendedor"
-                                        class="table table-hover responsive"
-                                        style="width: 100%"
-                                    >
-                                        <thead class="table-light">
-                                            <tr>
-                                                <th>Vendedor</th>
-                                                <th>Total de Ventas</th>
-                                                <th>Utilidad Total</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <!-- Aqui se cargan los datos dinamicamente-->
-                                        </tbody>
-                                    </table>
-
-                                    <div class="card my-4 shadow border">
-                                        <div class="card-body">
-                                            <h5
-                                                class="card-title text-center fw-bold"
-                                            >
-                                                Ranking de Utilidad por Vendedor
-                                            </h5>
-                                            <div class="chart-container">
-                                                <canvas
-                                                    id="graficoVendedores"
-                                                ></canvas>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div
-                                    class="tab-pane fade"
-                                    id="tab-utilidades-producto"
-                                >
-                                    <div
-                                        class="card bg-light shadow-sm mb-4 border-0"
-                                    >
-                                        <div class="card-body py-3">
-                                            <div
-                                                class="row g-3 align-items-center"
-                                            >
-                                                <div
-                                                    class="col-12 col-md-auto text-muted"
-                                                >
-                                                    <i
-                                                        class="bi bi-funnel-fill me-1"
-                                                    ></i>
-                                                    <strong
-                                                        >Filtrar por
-                                                        fecha:</strong
-                                                    >
-                                                </div>
-
-                                                <div class="col-md-3">
-                                                    <div class="input-group">
-                                                        <span
-                                                            class="input-group-text bg-white text-muted"
-                                                            ><i
-                                                                class="bi bi-calendar-event"
-                                                            ></i
-                                                        ></span>
-                                                        <input
-                                                            type="date"
-                                                            class="form-control"
-                                                            id="fechaInicioProducto"
-                                                        />
-                                                        <div
-                                                            id="fechaInicioProducto-error"
-                                                            class="invalid-feedback d-block"
-                                                        ></div>
-                                                    </div>
-                                                </div>
-
-                                                <div
-                                                    class="col-md-auto text-center text-muted d-none d-md-block"
-                                                >
-                                                    <i
-                                                        class="bi bi-arrow-right"
-                                                    ></i>
-                                                </div>
-
-                                                <div class="col-md-3">
-                                                    <div class="input-group">
-                                                        <span
-                                                            class="input-group-text bg-white text-muted"
-                                                            ><i
-                                                                class="bi bi-calendar-event-fill"
-                                                            ></i
-                                                        ></span>
-                                                        <input
-                                                            type="date"
-                                                            class="form-control"
-                                                            id="fechaFinProducto"
-                                                        />
-                                                        <div
-                                                            id="fechaFinProducto-error"
-                                                            class="invalid-feedback d-block"
-                                                        ></div>
-                                                    </div>
-                                                </div>
-
-                                                <div
-                                                    class="col-md-auto ms-auto d-flex gap-2"
-                                                >
-                                                    <button
-                                                        id="btnFiltrarProducto"
-                                                        class="btn btn-primary px-4"
-                                                    >
-                                                        <i
-                                                            class="bi bi-search"
-                                                        ></i>
-                                                        Buscar
-                                                    </button>
-                                                    <button
-                                                        id="btnLimpiarFiltrosProducto"
-                                                        class="btn btn-danger"
-                                                        title="Borrar filtros"
-                                                    >
-                                                        <i
-                                                            class="bi bi-x-lg"
-                                                        ></i>
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <table
-                                        id="tablaUtilidadesProducto"
-                                        class="table table-hover responsive"
-                                        style="width: 100%"
-                                    >
-                                        <thead class="table-light">
-                                            <tr>
-                                                <th>Producto</th>
-                                                <th>Cantidad Vendida</th>
-                                                <th>Total Venta</th>
-                                                <th>Utilidad</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <!-- Aqui se cargan los datos dinamicamente-->
-                                        </tbody>
-                                    </table>
-
-                                    <div class="card my-4 shadow border">
-                                        <div class="card-body">
-                                            <h5
-                                                class="card-title text-center fw-bold"
-                                            >
-                                                Utilidad por Producto (TOP 10)
-                                            </h5>
-                                            <div class="chart-container">
-                                                <canvas
-                                                    id="graficoProducto"
-                                                ></canvas>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
                             </div>
                         </div>
+                        
                     </div>
                 </div>
             </main>

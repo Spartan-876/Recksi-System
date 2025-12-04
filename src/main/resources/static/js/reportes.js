@@ -136,39 +136,39 @@ $(document).ready(function () {
     }
 
     function loadSelectsMovimientos() {
-        const $fAlmacen = $('#fAlmacen');
-        $fAlmacen.empty();
-        $fAlmacen.append($('<option>', { value: '', text: 'Todos' }));
+        const fAlmacen = $('#fAlmacen');
+        fAlmacen.empty();
+        fAlmacen.append($('<option>', { value: '', text: 'Todos' }));
         fetch('/almacen/api/listar')
             .then(r => r.json())
             .then(res => {
                 const items = res && res.data ? res.data : [];
                 items.forEach(a => {
-                    $fAlmacen.append($('<option>', { value: a.id, text: a.nombre }));
+                    fAlmacen.append($('<option>', { value: a.id, text: a.nombre }));
                 });
             }).catch(() => { });
 
-        const $fTipo = $('#fTipoMovimiento');
-        $fTipo.empty();
-        $fTipo.append($('<option>', { value: '', text: 'Todos' }));
+        const fTipo = $('#fTipoMovimiento');
+        fTipo.empty();
+        fTipo.append($('<option>', { value: '', text: 'Todos' }));
         fetch('/movimientoInventario/api/TipoMovimiento')
             .then(r => r.json())
             .then(res => {
                 const items = res && res.data ? res.data : [];
                 items.forEach(t => {
-                    $fTipo.append($('<option>', { value: t.id, text: t.nombre }));
+                    fTipo.append($('<option>', { value: t.id, text: t.nombre }));
                 });
             }).catch(() => { });
 
-        const $fUsuario = $('#fUsuario');
-        $fUsuario.empty();
-        $fUsuario.append($('<option>', { value: '', text: 'Todos' }));
+        const fUsuario = $('#fUsuario');
+        fUsuario.empty();
+        fUsuario.append($('<option>', { value: '', text: 'Todos' }));
         fetch('/usuarios/api/listar')
             .then(r => r.json())
             .then(res => {
                 const items = res && res.data ? res.data : [];
                 items.forEach(u => {
-                    $fUsuario.append($('<option>', { value: u.id, text: u.nombre }));
+                    fUsuario.append($('<option>', { value: u.id, text: u.nombre }));
                 });
             }).catch(() => { });
     }
