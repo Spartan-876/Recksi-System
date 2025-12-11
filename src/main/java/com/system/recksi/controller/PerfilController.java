@@ -46,7 +46,7 @@ public class PerfilController {
                     perfilData.put("id", perfil.getId());
                     perfilData.put("nombre", perfil.getNombre());
                     perfilData.put("descripcion", perfil.getDescripcion());
-                    perfilData.put("estado", perfil.isEstado());
+                    perfilData.put("estado", perfil.getEstado());
                     perfilData.put("opciones",
                             perfil.getOpciones().stream().map(op -> op.getId()).collect(Collectors.toSet()));
 

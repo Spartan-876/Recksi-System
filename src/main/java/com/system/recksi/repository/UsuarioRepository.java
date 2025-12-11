@@ -1,5 +1,6 @@
 package com.system.recksi.repository;
 
+import com.system.recksi.model.Perfil;
 import com.system.recksi.model.Usuario;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -21,4 +22,7 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
     List<Usuario> findAllByEstadoNot(Integer estado);
 
     long countByEstadoNot(Integer estado);
+
+    long countByPerfilAndEstado(Perfil perfil, Integer estado);
+
 }

@@ -1,14 +1,10 @@
-/**
- * Script para la gestión de perfiles y permisos
- * Archivo: src/main/resources/static/js/perfiles.js
- */
 
 $(document).ready(function () {
     // Variables globales
     let dataTable;
-    let isEditing = false;
     let perfilModal;
     let permisosModal;
+    let usuario;
 
     // Configuración inicial
     const API_BASE = '/perfiles/api';
@@ -18,10 +14,13 @@ $(document).ready(function () {
         get: (id) => `${API_BASE}/${id}`,
         toggleStatus: (id) => `${API_BASE}/cambiar-estado/${id}`,
         delete: (id) => `${API_BASE}/eliminar/${id}`,
-        options: `${API_BASE}/opciones`
+        options: `${API_BASE}/opciones`,
+        usuarioLogin: '/usuarios/api/usuarioLogueado',
+        getUsuario: (id) => `/usuarios/api/${id}`
     };
 
     // Inicializar Componentes
+    cargarDatosUsuarioLogueado();
     initializeDataTable();
     perfilModal = new bootstrap.Modal(document.getElementById('perfilModal'));
     permisosModal = new bootstrap.Modal(document.getElementById('permisosModal'));
@@ -49,7 +48,7 @@ $(document).ready(function () {
                 { data: 'descripcion' },
                 {
                     data: 'estado',
-                    render: (data) => data ? '<span class="badge text-bg-success">Activo</span>' : '<span class="badge text-bg-danger">Inactivo</span>'
+                    render: (data) => data === 1 ? '<span class="badge text-bg-success">Activo</span>' : '<span class="badge text-bg-danger">Inactivo</span>'
                 },
                 {
                     data: null,
@@ -84,11 +83,11 @@ $(document).ready(function () {
                     <i class="bi bi-pencil-square"></i>
                 </button>
 
-                <button data-id="${row.id}" class="btn btn-sm ${row.estado ? 'btn-warning' : 'btn-success'} action-status" title="${statusTitle}">
+                <button data-id="${row.id}" data-nombre="${row.nombre}" class="btn btn-sm ${row.estado ? 'btn-warning' : 'btn-success'} action-status" title="${statusTitle}">
                     <i class="bi ${statusIcon}"></i>
                 </button>
 
-                <button data-id="${row.id}" class="btn btn-sm btn-danger action-delete" title="Eliminar">
+                <button data-id="${row.id}" data-nombre="${row.nombre}" class="btn btn-sm btn-danger action-delete" title="Eliminar">
                     <i class="bi bi-trash3-fill"></i>
                 </button>
             </div>
@@ -160,6 +159,36 @@ $(document).ready(function () {
 
     function handleToggleStatus(e) {
         const id = $(this).data('id');
+        const nombre = $(this).data('nombre');
+
+
+        if (!usuario || !usuario.id) {
+            showNotification('No se pudo verificar el usuario logueado. Intente recargar la página.', 'error');
+            return;
+        }
+
+        if (usuario.perfil.id === id) {
+            Swal.fire({
+                title: 'Acción Inválida',
+                text: 'No puede inactivar su propio perfil.',
+                icon: 'error',
+                confirmButtonText: 'Aceptar',
+                confirmButtonColor: '#dc3545'
+            });
+            return;
+        }
+
+        if (nombre === "Administrador") {
+            Swal.fire({
+                title: 'Acción Inválida',
+                text: 'No puede inactivar a los administradores',
+                icon: 'error',
+                confirmButtonText: 'Aceptar',
+                confirmButtonColor: '#dc3545'
+            });
+            return;
+        }
+
         showLoading(true);
         fetch(ENDPOINTS.toggleStatus(id), { method: 'POST' })
             .then(response => response.json())
@@ -177,6 +206,34 @@ $(document).ready(function () {
 
     function handleDelete(e) {
         const id = $(this).data('id');
+        const nombre = $(this).data('nombre');
+
+        if (!usuario || !usuario.id) {
+            showNotification('No se pudo verificar el usuario logueado. Intente recargar la página.', 'error');
+            return;
+        }
+
+        if (usuario.perfil.id === id) {
+            Swal.fire({
+                title: 'Acción Inválida',
+                text: 'No puede eliminar su propio perfil.',
+                icon: 'error',
+                confirmButtonText: 'Aceptar',
+                confirmButtonColor: '#dc3545'
+            });
+            return;
+        }
+
+        if (nombre === "Administrador") {
+            Swal.fire({
+                title: 'Acción Inválida',
+                text: 'No puede eliminar el perfil administrador',
+                icon: 'error',
+                confirmButtonText: 'Aceptar',
+                confirmButtonColor: '#dc3545'
+            });
+            return;
+        }
 
         Swal.fire({
             title: '¿Estás seguro?',
@@ -293,14 +350,12 @@ $(document).ready(function () {
     }
 
     function openModalForNew() {
-        isEditing = false;
         clearForm();
         $('#modalTitle').text('Agregar Perfil');
         perfilModal.show();
     }
 
     function openModalForEdit(perfil) {
-        isEditing = true;
         clearForm();
         $('#modalTitle').text('Editar Perfil');
         $('#id').val(perfil.id);
@@ -357,4 +412,40 @@ $(document).ready(function () {
             $overlay.remove();
         }
     }
+
+    function cargarDatosUsuarioLogueado() {
+        fetch(ENDPOINTS.usuarioLogin)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Error al obtener ID de usuario.');
+                }
+                return response.json();
+            })
+            .then(loginData => {
+                if (loginData.success && loginData.usuarioActual) {
+                    return fetch(ENDPOINTS.getUsuario(loginData.usuarioActual));
+                } else {
+                    throw new Error('No se encontró el ID del usuario logueado en la respuesta.');
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Error al obtener los datos del usuario.');
+                }
+                return response.json();
+            })
+            .then(userData => {
+                if (userData.success) {
+                    usuario = userData.data;
+                } else {
+                    throw new Error('La respuesta para obtener datos de usuario no fue exitosa.');
+                }
+            })
+            .catch(error => {
+                console.error('Error al cargar la información del usuario logueado:', error);
+                usuario = null;
+                showNotification('No se pudo cargar la información del usuario. Algunas funciones podrían no operar correctamente.', 'error');
+            });
+    }
+
 });

@@ -4,6 +4,8 @@ $(document).ready(function () {
     let dataTable;
     let isEditing = false;
     let usuarioModal;
+    let usuario;
+
 
     // Configuración inicial
     const API_BASE = '/usuarios/api';
@@ -14,9 +16,11 @@ $(document).ready(function () {
         delete: (id) => `${API_BASE}/eliminar/${id}`,
         profiles: `${API_BASE}/perfiles`,
         toggleStatus: (id) => `${API_BASE}/cambiar-estado/${id}`,
+        usuarioLogin: `${API_BASE}/usuarioLogueado`,
     };
 
     // Inicializar DataTable
+    cargarDatosUsuarioLogueado();
     initializeDataTable();
 
     // Inicializar Modal de Bootstrap
@@ -83,10 +87,10 @@ $(document).ready(function () {
                 <button data-id="${row.id}" class="action-edit btn btn-sm btn-primary" title="Editar">
                     <i class="bi bi-pencil-square"></i>
                 </button>
-                <button data-id="${row.id}" class="action-status btn btn-sm ${row.estado === 1 ? 'btn-warning' : 'btn-success'}" title="${statusTitle}">
+                <button data-id="${row.id}" data-perfil="${row.perfil.nombre}" class="action-status btn btn-sm ${row.estado === 1 ? 'btn-warning' : 'btn-success'}" title="${statusTitle}">
                     ${statusIcon}
                 </button>
-                <button data-id="${row.id}" class="action-delete btn btn-sm btn-danger" title="Eliminar">
+                <button data-id="${row.id}" data-perfil="${row.perfil.nombre}" class="action-delete btn btn-sm btn-danger" title="Eliminar">
                     <i class="bi bi-trash3-fill"></i>
                 </button>
             </div>
@@ -217,6 +221,34 @@ $(document).ready(function () {
     function handleToggleStatus(e) {
         e.preventDefault();
         const id = $(this).data('id');
+        const perfil = $(this).data('perfil');
+
+        if (!usuario || !usuario.id) {
+            showNotification('No se pudo verificar el usuario logueado. Intente recargar la página.', 'error');
+            return;
+        }
+
+        if (usuario.id === id) {
+            Swal.fire({
+                title: 'Acción Inválida',
+                text: 'No puede inactivar su propio usuario.',
+                icon: 'error',
+                confirmButtonText: 'Aceptar',
+                confirmButtonColor: '#dc3545'
+            });
+            return;
+        }
+
+        if (perfil === "Administrador") {
+            Swal.fire({
+                title: 'Acción Inválida',
+                text: 'No puede inactivar a los administradores',
+                icon: 'error',
+                confirmButtonText: 'Aceptar',
+                confirmButtonColor: '#dc3545'
+            });
+            return;
+        }
 
         showLoading(true);
 
@@ -245,6 +277,34 @@ $(document).ready(function () {
         e.preventDefault();
 
         const id = $(this).data('id');
+        const perfil = $(this).data('perfil');
+
+        if (!usuario || !usuario.id) {
+            showNotification('No se pudo verificar el usuario logueado. Intente recargar la página.', 'error');
+            return;
+        }
+
+        if (usuario.id === id) {
+            Swal.fire({
+                title: 'Acción Inválida',
+                text: 'No puede eliminar su propio usuario.',
+                icon: 'error',
+                confirmButtonText: 'Aceptar',
+                confirmButtonColor: '#dc3545'
+            });
+            return;
+        }
+
+        if (perfil === "Administrador") {
+            Swal.fire({
+                title: 'Acción Inválida',
+                text: 'No puede eliminar a los administradores',
+                icon: 'error',
+                confirmButtonText: 'Aceptar',
+                confirmButtonColor: '#dc3545'
+            });
+            return;
+        }
 
         Swal.fire({
             title: '¿Estás seguro?',
@@ -355,7 +415,7 @@ $(document).ready(function () {
             showFieldError('clave', 'La contraseña debe tener al menos 6 caracteres');
             hasErrors = true;
         }
-        
+
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.correo)) {
             showFieldError('correo', 'El formato del correo no es válido');
             hasErrors = true;
@@ -415,4 +475,40 @@ $(document).ready(function () {
             $overlay.remove();
         }
     }
+
+    function cargarDatosUsuarioLogueado() {
+        fetch(ENDPOINTS.usuarioLogin)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Error al obtener ID de usuario.');
+                }
+                return response.json();
+            })
+            .then(loginData => {
+                if (loginData.success && loginData.usuarioActual) {
+                    return fetch(ENDPOINTS.get(loginData.usuarioActual));
+                } else {
+                    throw new Error('No se encontró el ID del usuario logueado en la respuesta.');
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Error al obtener los datos del usuario.');
+                }
+                return response.json();
+            })
+            .then(userData => {
+                if (userData.success) {
+                    usuario = userData.data;
+                } else {
+                    throw new Error('La respuesta para obtener datos de usuario no fue exitosa.');
+                }
+            })
+            .catch(error => {
+                console.error('Error al cargar la información del usuario logueado:', error);
+                usuario = null;
+                showNotification('No se pudo cargar la información del usuario. Algunas funciones podrían no operar correctamente.', 'error');
+            });
+    }
+
 });

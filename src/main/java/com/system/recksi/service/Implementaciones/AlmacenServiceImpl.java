@@ -30,6 +30,7 @@ public class AlmacenServiceImpl implements AlmacenService {
     }
 
     @Override
+    @Transactional
     public Almacen guardarAlmacen(AlmacenDTO almacen) {
         try {
             String nombreLimpio = almacen.getNombre().trim();
@@ -55,6 +56,7 @@ public class AlmacenServiceImpl implements AlmacenService {
     }
 
     @Override
+    @Transactional
     public Almacen actualizarAlmacen(Long id,AlmacenDTO almacen) {
         try {
             Almacen almacenActual = almacenRepository.findById(id)
@@ -98,6 +100,7 @@ public class AlmacenServiceImpl implements AlmacenService {
     }
 
     @Override
+    @Transactional
     public void eliminarAlmacen(Long id) {
         if (id == null || id <= 0) {
             throw new IllegalArgumentException("El id del almacen debe ser valido");
@@ -115,11 +118,13 @@ public class AlmacenServiceImpl implements AlmacenService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Almacen obtenerAlmacenPorId(Long id) {
         return almacenRepository.findById(id).orElse(null);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public long contarAlmacenes() {
         return almacenRepository.countByEstadoNot(2);
     }

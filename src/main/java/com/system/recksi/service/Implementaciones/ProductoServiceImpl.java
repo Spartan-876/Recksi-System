@@ -2,6 +2,7 @@ package com.system.recksi.service.Implementaciones;
 
 import com.system.recksi.DTO.ProductoDTO;
 import com.system.recksi.model.Producto;
+import com.system.recksi.repository.AlmacenRepository;
 import com.system.recksi.repository.ProductoRepository;
 import com.system.recksi.service.Interfaces.ProductoService;
 import jakarta.persistence.EntityNotFoundException;
@@ -15,9 +16,11 @@ import java.util.Optional;
 public class ProductoServiceImpl implements ProductoService {
 
     private final ProductoRepository productoRepository;
+    private final AlmacenRepository almacenRepository;
 
-    public ProductoServiceImpl(ProductoRepository productoRepository) {
+    public ProductoServiceImpl(ProductoRepository productoRepository, AlmacenRepository almacenRepository) {
         this.productoRepository = productoRepository;
+        this.almacenRepository = almacenRepository;
     }
 
     @Transactional(readOnly = true)
@@ -97,11 +100,17 @@ public class ProductoServiceImpl implements ProductoService {
     @Transactional
     public void eliminarProducto(Long id) {
         if (id == null || id <= 0) {
-            throw new IllegalArgumentException("ID de producto inválido");
+            throw new IllegalArgumentException("ID inválido");
         }
-        Producto producto = obtenerProductoPorId(id)
+
+        Producto producto = productoRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Producto no encontrado"));
 
+        Integer stockTotal = almacenRepository.obtenerStockTotalPorProducto(id);
+
+        if (stockTotal > 0) {
+            throw new IllegalStateException("No se puede eliminar: El producto tiene " + stockTotal + " unidades en stock. Vacíe el inventario primero.");
+        }
         producto.setEstado(2);
         productoRepository.save(producto);
     }
@@ -113,11 +122,15 @@ public class ProductoServiceImpl implements ProductoService {
         }
 
         return obtenerProductoPorId(id).map(producto -> {
-            if (producto.getEstado() == 1) {
-                producto.setEstado(0);
-            } else if (producto.getEstado() == 0) {
-                producto.setEstado(1);
+            int nuevoEstado = (producto.getEstado() == 1) ? 0 : 1;
+            if (nuevoEstado == 0) {
+                boolean tieneStock = almacenRepository.existsByProductoIdAndStockActualGreaterThan(id, 0);
+
+                if (tieneStock) {
+                    throw new IllegalStateException("No se puede inactivar: El producto tiene stock físico en almacenes.");
+                }
             }
+            producto.setEstado(nuevoEstado);
             return productoRepository.save(producto);
         });
     }

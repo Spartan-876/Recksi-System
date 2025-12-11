@@ -4,6 +4,7 @@ import com.system.recksi.model.Perfil;
 import com.system.recksi.model.Opcion;
 import com.system.recksi.repository.PerfilRepository;
 import com.system.recksi.repository.OpcionRepository;
+import com.system.recksi.repository.UsuarioRepository;
 import com.system.recksi.service.Interfaces.PerfilService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,10 +18,12 @@ public class PerfilServiceImpl implements PerfilService {
 
     private final PerfilRepository perfilRepository;
     private final OpcionRepository opcionRepository;
+    private final UsuarioRepository usuarioRepository;
 
-    public PerfilServiceImpl(PerfilRepository perfilRepository, OpcionRepository opcionRepository) {
+    public PerfilServiceImpl(PerfilRepository perfilRepository, OpcionRepository opcionRepository, UsuarioRepository usuarioRepository) {
         this.perfilRepository = perfilRepository;
         this.opcionRepository = opcionRepository;
+        this.usuarioRepository = usuarioRepository;
     }
 
     @Override
@@ -68,8 +71,12 @@ public class PerfilServiceImpl implements PerfilService {
     @Override
     @Transactional
     public Optional<Perfil> cambiarEstadoPerfil(Long id) {
-        return perfilRepository.findById(id.longValue()).map(perfil -> {
-            perfil.setEstado(!perfil.isEstado());
+        return perfilRepository.findById(id).map(perfil -> {
+            if (perfil.getEstado() == 1) {
+                perfil.setEstado(0);
+            } else if (perfil.getEstado() == 0) {
+                perfil.setEstado(1);
+            }
             return perfilRepository.save(perfil);
         });
     }
@@ -83,6 +90,15 @@ public class PerfilServiceImpl implements PerfilService {
     @Override
     @Transactional
     public void eliminarPerfil(Long id) {
-        perfilRepository.deleteById(id.longValue());
+        Perfil perfil = perfilRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("El perfil con ID " + id + " no existe."));
+
+        long usuariosActivos = usuarioRepository.countByPerfilAndEstado(perfil, 1);
+        if (usuariosActivos > 0) {
+            throw new IllegalStateException("No se puede eliminar el perfil porque está asignado a " + usuariosActivos + " usuario(s) activo(s).");
+        }
+
+        perfil.setEstado(2);
+        perfilRepository.save(perfil);
     }
 }
