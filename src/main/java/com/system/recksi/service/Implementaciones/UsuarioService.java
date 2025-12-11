@@ -109,7 +109,7 @@ public class UsuarioService {
         Usuario usuario = obtenerUsuarioPorId(id)
                 .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
 
-        usuario.setEstado(2); // 2 significa "eliminado"
+        usuario.setEstado(2);
         usuarioRepository.save(usuario);
     }
 
